@@ -364,7 +364,8 @@ class Challenge(Resource):
                     {"id": hint.id, "cost": hint.cost, "content": hint.content}
                 )
             else:
-                hints.append({"id": hint.id, "cost": hint.cost})
+                if hint.requirements is None or set(hint.requirements).issubset(set(unlocked_hints)):
+                    hints.append({"id": hint.id, "cost": hint.cost})
 
         response = chal_class.read(challenge=chal)
 
