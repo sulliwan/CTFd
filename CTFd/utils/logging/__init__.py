@@ -4,15 +4,16 @@ import time
 
 from flask import session
 
-from CTFd.utils.user import get_ip
+from CTFd.utils.user import get_ip, get_current_user
 
 
 def log(logger, format, **kwargs):
     logger = logging.getLogger(logger)
+    user = get_current_user()
     props = {
         "id": session.get("id"),
-        "name": session.get("name"),
-        "email": session.get("email"),
+        "name": user.name,
+        "email": user.email,
         "date": time.strftime("%m/%d/%Y %X"),
         "ip": get_ip(),
     }
