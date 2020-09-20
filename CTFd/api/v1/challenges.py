@@ -329,6 +329,9 @@ class Challenge(Resource):
         if authed():
             user = get_current_user()
             team = get_current_team()
+            chal.is_solved = Solves.query.filter_by(
+                account_id=user.account_id, challenge_id=chal.id
+                ).first() is not None
 
             # TODO: Convert this into a re-useable decorator
             if is_admin():
@@ -357,14 +360,15 @@ class Challenge(Resource):
                 )
         else:
             files = [url_for("views.files", path=f.location) for f in chal.files]
-
+ 
         for hint in Hints.query.filter_by(challenge_id=chal.id).all():
-            if hint.id in unlocked_hints or ctf_ended():
+            if hint.id in unlocked_hints or ctf_ended() or chal.is_solved:
                 hints.append(
                     {"id": hint.id, "cost": hint.cost, "content": hint.content}
                 )
             else:
-                hints.append({"id": hint.id, "cost": hint.cost})
+                if hint.requirements is None or set(hint.requirements).issubset(set(unlocked_hints)):
+                    hints.append({"id": hint.id, "cost": hint.cost})
 
         response = chal_class.read(challenge=chal)
 
