@@ -7,7 +7,7 @@ from CTFd.api.v1.helpers.request import validate_args
 from CTFd.api.v1.helpers.schemas import sqlalchemy_to_pydantic
 from CTFd.api.v1.schemas import APIDetailedSuccessResponse, APIListSuccessResponse
 from CTFd.constants import RawEnum
-from CTFd.models import Hints, HintUnlocks, db
+from CTFd.models import Hints, HintUnlocks, db, Solves
 from CTFd.schemas.hints import HintSchema
 from CTFd.utils.decorators import admins_only, authed_only, during_ctf_time_only
 from CTFd.utils.helpers.models import build_model_filters
@@ -127,6 +127,11 @@ class Hint(Resource):
                 account_id=user.account_id, target=hint.id
             ).first()
             if unlocked:
+                view = "unlocked"
+            solved = Solves.query.filter_by(
+                account_id=user.account_id, challenge_id=hint.challenge_id
+                ).first() is not None
+            if solved:
                 view = "unlocked"
 
         if is_admin():
